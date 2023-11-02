@@ -43,8 +43,8 @@ const getConfig = () => {
 
 const createPanel = async (context) => {
   const panel = vscode.window.createWebviewPanel(
-    'codesnap',
-    'CodeSnap 📸',
+    'codesnaptocanva',
+    'CodeSnapToCanva 📸',
     { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
     {
       enableScripts: true,
@@ -102,5 +102,5 @@ const runCommand = async (context) => {
 
 module.exports.activate = (context) =>
   context.subscriptions.push(
-    vscode.commands.registerCommand('codesnap.start', () => runCommand(context))
+    vscode.commands.registerCommand('codesnaptocanva.start', () => runCommand(context))
   );
