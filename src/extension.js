@@ -69,6 +69,15 @@ const saveImage = async (data) => {
   uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
 };
 
+const uploadImage = async (data) => {
+  const uri = await vscode.window.showSaveDialog({
+    filters: { Images: ['png'] },
+    defaultUri: lastUsedImageUri
+  });
+  lastUsedImageUri = uri;
+  uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
+};
+
 const hasOneSelection = (selections) =>
   selections && selections.length === 1 && !selections[0].isEmpty;
 
@@ -85,7 +94,8 @@ const runCommand = async (context) => {
   panel.webview.onDidReceiveMessage(async ({ type, data }) => {
     if (type === 'save') {
       flash();
-      await saveImage(data);
+      vscode.window.showInformationMessage('Upload'); // TODO Add save action back
+      await uploadImage(data);
     } else {
       vscode.window.showErrorMessage(`CodeSnap 📸: Unknown shutterAction "${type}"`);
     }

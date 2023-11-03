@@ -117,10 +117,11 @@
           "scope": "resource",
           "type": "string",
           "enum": [
+            "upload",
             "save",
             "copy"
           ],
-          "default": "save",
+          "default": "upload",
           "description": "The behavior of the shutter button"
         }
       }
