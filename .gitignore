@@ -2,3 +2,4 @@ node_modules
 *.vsix
 *.dSYM
 .gitpod.yml
+certs

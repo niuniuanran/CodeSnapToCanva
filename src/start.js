@@ -3,6 +3,7 @@ const path = require('path');
 const { homedir } = require('os');
 const { readHtml, writeFile, getSettings } = require('./util');
 const vscode = require('vscode');
+const fetch = require('node-fetch');
 
 const getConfig = () => {
   const editorSettings = getSettings('editor', ['fontLigatures', 'tabSize']);
@@ -58,7 +59,7 @@ const createPanel = async (context) => {
   return panel;
 };
 
-let lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.png'));
+const lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.png'));
 // const saveImage = async (data) => {
 //   const uri = await vscode.window.showSaveDialog({
 //     filters: { Images: ['png'] },
@@ -68,13 +69,26 @@ let lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.png
 //   uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
 // };
 
-const uploadImage = async (data) => {
-  const uri = await vscode.window.showSaveDialog({
-    filters: { Images: ['png'] },
-    defaultUri: lastUsedImageUri
+const uploadImage = async (context, data) => {
+  // const uri = await vscode.window.showSaveDialog({
+  //   filters: { Images: ['png'] },
+  //   defaultUri: lastUsedImageUri
+  // });
+  // lastUsedImageUri = uri;
+  // uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
+  const binaryData = Buffer.from(data, 'base64');
+  const response = await fetch('https://api.canva.com/rest/v1/assets/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/octet-stream',
+      Authorization: `Bearer ${context.secrets.get('oauthCode')}`,
+      'Upload-Metadata': {
+        name: 'codeSnap.png',
+        parent_folder_id: 'FAFzFNtJKjc'
+      }
+    },
+    body: binaryData // Your binary buffer goes here
   });
-  lastUsedImageUri = uri;
-  uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
 };
 
 const hasOneSelection = (selections) =>
@@ -94,7 +108,7 @@ const runStartCommand = async (context) => {
     if (type === 'save') {
       flash();
       vscode.window.showInformationMessage('Upload'); // TODO Add save action back
-      await uploadImage(data);
+      await uploadImage(context, data);
     } else {
       vscode.window.showErrorMessage(`CodeSnap 📸: Unknown shutterAction "${type}"`);
     }
