@@ -1,9 +1,9 @@
 'use strict';
 const path = require('path');
 const { homedir } = require('os');
+
 const { readHtml, writeFile, getSettings } = require('./util');
 const vscode = require('vscode');
-const fetch = require('node-fetch');
 
 const getConfig = () => {
   const editorSettings = getSettings('editor', ['fontLigatures', 'tabSize']);
@@ -69,26 +69,32 @@ const lastUsedImageUri = vscode.Uri.file(path.resolve(homedir(), 'Desktop/code.p
 //   uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
 // };
 
+const axios = require('axios');
 const uploadImage = async (context, data) => {
-  // const uri = await vscode.window.showSaveDialog({
-  //   filters: { Images: ['png'] },
-  //   defaultUri: lastUsedImageUri
-  // });
-  // lastUsedImageUri = uri;
-  // uri && writeFile(uri.fsPath, Buffer.from(data, 'base64'));
   const binaryData = Buffer.from(data, 'base64');
-  const response = await fetch('https://api.canva.com/rest/v1/assets/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/octet-stream',
-      Authorization: `Bearer ${context.secrets.get('oauthCode')}`,
-      'Upload-Metadata': {
-        name: 'codeSnap.png',
-        parent_folder_id: 'FAFzFNtJKjc'
+
+  const apiUrl = 'https://api.canva.com/rest/v1/assets/upload';
+  const oauthCode = await context.secrets.get('oauthCode');
+  const parentFolderId = 'FAFzFNtJKjc';
+
+  try {
+    const response = await axios.post(apiUrl, binaryData, {
+      headers: {
+        Authorization: `Bearer ${oauthCode}`,
+        'Content-Type': 'application/octet-stream',
+        'Upload-Metadata': JSON.stringify({
+          name: 'codeSnap.png',
+          parent_folder_id: parentFolderId
+        })
       }
-    },
-    body: binaryData // Your binary buffer goes here
-  });
+    });
+    console.log(response);
+  } catch (error) {
+    console.log(error);
+    if (error.response) {
+      console.log(error.response);
+    }
+  }
 };
 
 const hasOneSelection = (selections) =>

@@ -43,10 +43,4 @@ const startRedirectServer = (context) => {
   });
 };
 
-const saveCode = async (code) => {
-  const secretStorage = vscode.secrets;
-  await secretStorage.store('oauthCode', code);
-  vscode.window.showInformationMessage('Authorization code saved securely.' + code);
-};
-
 module.exports = { runSignInCommand };
